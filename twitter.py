@@ -1,10 +1,9 @@
 import os
-
 import tweepy
+import re
 from secrets import *
 from dotenv import load_dotenv
-import re
-import os
+
 
 load_dotenv()
 filepath = 'listTweetID.txt'
@@ -25,16 +24,18 @@ f = open(filepath, "a+")
 regex = r"(^|[^@\w])@(\w{1,15})\b"
 
 for tweet in tweepy.Cursor(api.search,q="concours RT",
-                           lang="fr",result_type='popular').items(40):
+                           lang="fr",result_type='popular').items(int(os.getenv('SEARCH_ITEM_NUMBER'))):
 
-    print("\n===============================================")
-    print("Tweet ID : ", int(tweet.id_str))
     if int(tweet.id_str) in listTweetID:
-        print("already here")
+        if os.getenv('DEBUG') == 1:
+            print("tweet already processed : ",int(tweet.id_str))
         continue
 
     else:
+        print("\n===============================================")
+        print("Tweet ID : ", int(tweet.id_str))
         print (tweet.text)
+        f.write(str(int(tweet.id_str)) + "\n")
         matches = re.findall(regex, tweet.text)
         for match in matches:
             print("Follow @%s" % (match[1]))
@@ -56,5 +57,4 @@ for tweet in tweepy.Cursor(api.search,q="concours RT",
             print(e)
             pass
 
-            f.write(str(int(tweet.id_str)) + "\n")
 f.close()
