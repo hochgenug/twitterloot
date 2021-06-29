@@ -1,18 +1,23 @@
+import os
+
 import tweepy
 from secrets import *
+from dotenv import load_dotenv
 import re
+import os
 
+load_dotenv()
 filepath = 'listTweetID.txt'
 listTweetID = []
 try:
     with open(filepath) as fp:
         for cnt, line in enumerate(fp):
-           listTweetID.append(int(line))
+            listTweetID.append(int(line))
 finally:
     fp.close()
 
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_secret)
+auth = tweepy.OAuthHandler(os.getenv('CONSUMER_KEY'), os.getenv('CONSUMER_SECRET'))
+auth.set_access_token(os.getenv('ACCESS_TOKEN'), os.getenv('ACCESS_SECRET'))
 
 api = tweepy.API(auth,wait_on_rate_limit=True)
 
@@ -33,7 +38,6 @@ for tweet in tweepy.Cursor(api.search,q="concours RT",
         matches = re.findall(regex, tweet.text)
         for match in matches:
             print("Follow @%s" % (match[1]))
-            #print(tweet.id)
             try:
                 api.create_friendship(match[1])
             except Exception as e:
