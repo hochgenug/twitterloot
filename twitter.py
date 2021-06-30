@@ -1,7 +1,6 @@
 import os
 import tweepy
 import re
-from secrets import *
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -47,6 +46,12 @@ for tweet in tweepy.Cursor(api.search,q="concours RT",
 
         try:
             api.create_favorite(tweet.id)
+        except Exception as e:
+            print(e)
+            pass
+
+        try:
+            api.create_friendship(tweet.user.screen_name)
         except Exception as e:
             print(e)
             pass
