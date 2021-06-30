@@ -11,8 +11,9 @@ try:
     with open(filepath) as fp:
         for cnt, line in enumerate(fp):
             listTweetID.append(int(line))
-finally:
     fp.close()
+except FileNotFoundError:
+    f = open("listTweetID.txt", "w")
 
 auth = tweepy.OAuthHandler(os.getenv('CONSUMER_KEY'), os.getenv('CONSUMER_SECRET'))
 auth.set_access_token(os.getenv('ACCESS_TOKEN'), os.getenv('ACCESS_SECRET'))
