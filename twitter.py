@@ -21,6 +21,7 @@ api = tweepy.API(auth,wait_on_rate_limit=True)
 
 f = open(filepath, "a+")
 regex = r"(^|[^@\w])@(\w{1,30})"
+newtweetcounter, oldtweetcounter = 0, 0
 
 for tweet in tweepy.Cursor(api.search,q="concours RT",
                            lang="fr",result_type='popular', tweet_mode='extended').items(int(os.getenv('SEARCH_ITEM_NUMBER'))):
@@ -28,6 +29,7 @@ for tweet in tweepy.Cursor(api.search,q="concours RT",
     if int(tweet.id_str) in listTweetID:
         if os.getenv('DEBUG') == 1:
             print("tweet already processed : ",int(tweet.id_str))
+        oldtweetcounter += 1
         continue
 
     else:
@@ -36,6 +38,7 @@ for tweet in tweepy.Cursor(api.search,q="concours RT",
         print (tweet.full_text)
         f.write(str(int(tweet.id_str)) + "\n")
         matches = re.findall(regex, tweet.full_text)
+        newtweetcounter += 1
         for match in matches:
             print("Follow @%s" % (match[1]))
             try:
@@ -62,4 +65,5 @@ for tweet in tweepy.Cursor(api.search,q="concours RT",
             print(e)
             pass
 
+print('Subscribed to',newtweetcounter,'new contests.',oldtweetcounter,'were ignored (already subscribed)')
 f.close()
