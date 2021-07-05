@@ -21,15 +21,21 @@ api = tweepy.API(auth,wait_on_rate_limit=True)
 
 f = open(filepath, "a+")
 regex = r"(^|[^@\w])@(\w{1,30})"
-newtweetcounter, oldtweetcounter = 0, 0
+newtweetcounter, oldtweetcounter, ignorecounter = 0, 0, 0
 
-for tweet in tweepy.Cursor(api.search,q="concours RT",
-                           lang="fr",result_type='popular', tweet_mode='extended').items(int(os.getenv('SEARCH_ITEM_NUMBER'))):
+for tweet in tweepy.Cursor(api.search, q="concours RT",
+                           lang="fr", result_type='popular', count=int(os.getenv('SEARCH_ITEM_NUMBER')),
+                           tweet_mode='extended').items(int(os.getenv('SEARCH_ITEM_NUMBER'))):
 
     if int(tweet.id_str) in listTweetID:
-        if os.getenv('DEBUG') == 1:
+        if int(os.getenv('DEBUG')) == 1:
             print("tweet already processed : ",int(tweet.id_str))
         oldtweetcounter += 1
+        continue
+    elif (tweet.in_reply_to_status_id is not None) or hasattr(tweet, 'retweeted_status'):
+        if int(os.getenv('DEBUG')) == 1:
+            print("tweet is a reply/RT : ",int(tweet.id_str))
+        ignorecounter += 1
         continue
 
     else:
@@ -65,5 +71,5 @@ for tweet in tweepy.Cursor(api.search,q="concours RT",
             print(e)
             pass
 
-print('Subscribed to',newtweetcounter,'new contests.',oldtweetcounter,'were ignored (already subscribed)')
+print('Subscribed to',newtweetcounter,'new contests.',oldtweetcounter,'were ignored (already subscribed)',ignorecounter,'were ignored (reply or RT)')
 f.close()
