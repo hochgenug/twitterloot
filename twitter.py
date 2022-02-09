@@ -3,8 +3,9 @@ import tweepy
 import re
 from dotenv import load_dotenv
 
+################# Building a list with already liked/RTed tweets #################
 load_dotenv()
-filepath = 'listTweetID.txt'
+filepath = '/Users/faugerouxbruno/Documents/GitHub/twitterloot/listTweetID.txt'
 listTweetID = []
 try:
     with open(filepath) as fp:
@@ -14,9 +15,9 @@ try:
 except FileNotFoundError:
     f = open("listTweetID.txt", "w")
 
+################# Using tweeter API #################
 auth = tweepy.OAuthHandler(os.getenv('CONSUMER_KEY'), os.getenv('CONSUMER_SECRET'))
 auth.set_access_token(os.getenv('ACCESS_TOKEN'), os.getenv('ACCESS_SECRET'))
-
 api = tweepy.API(auth,wait_on_rate_limit=True)
 
 f = open(filepath, "a+")
@@ -26,6 +27,9 @@ newtweetcounter, oldtweetcounter, ignorecounter = 0, 0, 0
 for tweet in tweepy.Cursor(api.search, q="concours RT",
                            lang="fr", result_type='popular', count=int(os.getenv('SEARCH_ITEM_NUMBER')),
                            tweet_mode='extended').items(int(os.getenv('SEARCH_ITEM_NUMBER'))):
+
+    if (tweet.user.screen_name == '@topito_com' or tweet.user.screen_name == 'topito_com'):
+        continue
 
     if int(tweet.id_str) in listTweetID:
         if int(os.getenv('DEBUG')) == 1:
@@ -39,9 +43,6 @@ for tweet in tweepy.Cursor(api.search, q="concours RT",
         continue
 
     else:
-        print("\n===============================================")
-        print("Tweet ID : ", int(tweet.id_str))
-        print (tweet.full_text)
         f.write(str(int(tweet.id_str)) + "\n")
         matches = re.findall(regex, tweet.full_text)
         newtweetcounter += 1
@@ -55,6 +56,9 @@ for tweet in tweepy.Cursor(api.search, q="concours RT",
 
         try:
             api.create_favorite(tweet.id)
+            if (tweet.full_text.lower().find('tag') != -1 or tweet.full_text.lower().find('identifie') != -1  or tweet.full_text.lower().find('mentionne') != -1 or tweet.full_text.lower().find('ami') != -1 or tweet.full_text.lower().find('comment') != -1):
+                api.update_status(status = '@ramasmaf ça peut t interesser', in_reply_to_status_id = tweet.id , auto_populate_reply_metadata=True)
+                print("Maf was taggued : ",int(tweet.id_str))
         except Exception as e:
             print(e)
             pass
@@ -72,4 +76,45 @@ for tweet in tweepy.Cursor(api.search, q="concours RT",
             pass
 
 print('Subscribed to',newtweetcounter,'new contests.',oldtweetcounter,'were ignored (already subscribed)',ignorecounter,'were ignored (reply or RT)')
+
+for tweet in tweepy.Cursor(api.search, q="Demon slayer",
+                           lang="fr", result_type='popular', count=5,
+                           tweet_mode='extended').items(5):
+    f.write(str(int(tweet.id_str)) + "\n")
+    try:
+        tweet.retweet()
+    except Exception as e:
+        print(e)
+        pass
+
+for tweet in tweepy.Cursor(api.search, q="Fate Stay Night",
+                           lang="fr", result_type='popular', count=5,
+                           tweet_mode='extended').items(5):
+    f.write(str(int(tweet.id_str)) + "\n")
+    try:
+        tweet.retweet()
+    except Exception as e:
+        print(e)
+        pass
+
+for tweet in tweepy.Cursor(api.search, q="Symfony php",
+                           lang="fr", result_type='popular', count=5,
+                           tweet_mode='extended').items(5):
+    f.write(str(int(tweet.id_str)) + "\n")
+    try:
+        tweet.retweet()
+    except Exception as e:
+        print(e)
+        pass
+
+for tweet in tweepy.Cursor(api.search, q="attaque des titans",
+                           lang="fr", result_type='popular', count=5,
+                           tweet_mode='extended').items(5):
+    f.write(str(int(tweet.id_str)) + "\n")
+    try:
+        tweet.retweet()
+    except Exception as e:
+        print(e)
+        pass
+
 f.close()
