@@ -1,4 +1,5 @@
 import os
+import time
 import tweepy
 import re
 from dotenv import load_dotenv
@@ -24,13 +25,15 @@ f = open(filepath, "a+")
 regex = r"(^|[^@\w])@(\w{1,30})"
 newtweetcounter, oldtweetcounter, ignorecounter = 0, 0, 0
 
+ignoreList =  os.getenv('IGNORE').split(",")
+
 searchwordlist =  os.getenv('SEARCH_WORDS').split(",")
 for searchword in searchwordlist:
     for tweet in tweepy.Cursor(api.search, q=searchword,
                             lang="fr", result_type='popular', count=int(os.getenv('SEARCH_ITEM_NUMBER')),
                             tweet_mode='extended').items(int(os.getenv('SEARCH_ITEM_NUMBER'))):
 
-        if (tweet.user.screen_name == '@topito_com' or tweet.user.screen_name == 'topito_com'):
+        if tweet.user.screen_name in ignoreList:
             continue
 
         if int(tweet.id_str) in listTweetID:
@@ -75,6 +78,7 @@ for searchword in searchwordlist:
             except Exception as e:
                 print(e)
                 pass
+            time.sleep(5)
 
 print('Subscribed to',newtweetcounter,'new contests.',oldtweetcounter,'were ignored (already subscribed)',ignorecounter,'were ignored (reply or RT)')
 
@@ -85,12 +89,15 @@ for item in itemlist:
     for tweet in tweepy.Cursor(api.search, q=item,
                            lang="fr", result_type='popular', count=int(os.getenv('ALTERNATIVE_ITEM_NUMBER')),
                            tweet_mode='extended').items(int(os.getenv('ALTERNATIVE_ITEM_NUMBER'))):
+        if int(tweet.id_str) in listTweetID:
+            continue
         f.write(str(int(tweet.id_str)) + "\n")
         try:
             tweet.retweet()
         except Exception as e:
             print(e)
             pass
+        time.sleep(5)
 
 
 f.close()

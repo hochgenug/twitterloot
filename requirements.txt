@@ -1,2 +1,2 @@
-tweepy>=3.10
+tweepy==3.10
 python-dotenv>=0.18
