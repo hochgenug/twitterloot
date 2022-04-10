@@ -52,7 +52,8 @@ for searchword in searchwordlist:
             matches = re.findall(regex, tweet.full_text)
             newtweetcounter += 1
             for match in matches:
-                print("Follow @%s" % (match[1]))
+                if int(os.getenv('DEBUG')) == 1:
+                    print("Follow @%s" % (match[1]))
                 try:
                     api.create_friendship(match[1])
                 except Exception as e:
@@ -80,7 +81,7 @@ for searchword in searchwordlist:
                 pass
             time.sleep(5)
 
-print('Subscribed to',newtweetcounter,'new contests.',oldtweetcounter,'were ignored (already subscribed)',ignorecounter,'were ignored (reply or RT)')
+    print('[',searchword,']','Subscribed to',newtweetcounter,'new contests.',oldtweetcounter,'were ignored (already subscribed)',ignorecounter,'were ignored (reply or RT)')
 
 ################# RT alternatives topics to hide competition RT #################
 itemlist =  os.getenv('ALTERNATIVE_TOPICS').split(",")
