@@ -1,2 +1,4 @@
 listTweetID.txt
 .env
+errorlogfile.log
+logfile.log
