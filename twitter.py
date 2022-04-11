@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 ################# Building a list with already liked/RTed tweets #################
 load_dotenv()
-filepath = '/Users/faugerouxbruno/Documents/GitHub/twitterloot/listTweetID.txt'
+filepath = os.getenv('FILE_PATH')
 listTweetID = []
 try:
     with open(filepath) as fp:
@@ -15,16 +15,16 @@ try:
     fp.close()
 except FileNotFoundError:
     f = open("listTweetID.txt", "w")
+f = open(filepath, "a+")
 
 ################# Using tweeter API #################
 auth = tweepy.OAuthHandler(os.getenv('CONSUMER_KEY'), os.getenv('CONSUMER_SECRET'))
 auth.set_access_token(os.getenv('ACCESS_TOKEN'), os.getenv('ACCESS_SECRET'))
 api = tweepy.API(auth,wait_on_rate_limit=True)
 
-f = open(filepath, "a+")
+
 regex = r"(^|[^@\w])@(\w{1,30})"
 newtweetcounter, oldtweetcounter, ignorecounter = 0, 0, 0
-
 ignoreList =  os.getenv('IGNORE').split(",")
 
 searchwordlist =  os.getenv('SEARCH_WORDS').split(",")
@@ -63,7 +63,7 @@ for searchword in searchwordlist:
             try:
                 api.create_favorite(tweet.id)
                 if (tweet.full_text.lower().find('tag') != -1 or tweet.full_text.lower().find('identifie') != -1  or tweet.full_text.lower().find('mentionne') != -1 or tweet.full_text.lower().find('ami') != -1 or tweet.full_text.lower().find('comment') != -1):
-                    api.update_status(status = '@ramasmaf ça peut t interesser', in_reply_to_status_id = tweet.id , auto_populate_reply_metadata=True)
+                    api.update_status(status = os.getenv('TAG_TEXT'), in_reply_to_status_id = tweet.id , auto_populate_reply_metadata=True)
             except Exception as e:
                 print(e)
                 pass
@@ -85,7 +85,6 @@ for searchword in searchwordlist:
 
 ################# RT alternatives topics to hide competition RT #################
 itemlist =  os.getenv('ALTERNATIVE_TOPICS').split(",")
-#print(itemlist)
 for item in itemlist:
     for tweet in tweepy.Cursor(api.search, q=item,
                            lang="fr", result_type='popular', count=int(os.getenv('ALTERNATIVE_ITEM_NUMBER')),
